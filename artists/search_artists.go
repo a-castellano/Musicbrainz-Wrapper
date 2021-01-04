@@ -7,6 +7,7 @@ import (
 	commontypes "github.com/a-castellano/music-manager-common-types/types"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -16,8 +17,10 @@ func processResult(searchResult map[string]interface{}) (SearchArtistData, []Sea
 	var artistData SearchArtistData
 	var artistExtraData []SearchArtistData
 
-	if searchResult["count"] == 0 {
-		return artistData, artistExtraData, errors.New("Search returned no results.")
+	numberOfResultsString := fmt.Sprintf("%v", searchResult["count"])
+	numberOfResults, _ := strconv.Atoi(numberOfResultsString)
+	if numberOfResults == 0 {
+		return artistData, artistExtraData, errors.New("No artist was found.")
 	}
 
 	return artistData, artistExtraData, nil
