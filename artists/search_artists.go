@@ -58,6 +58,5 @@ func SearchArtist(client http.Client, artist string) (SearchArtistData, []Search
 		return artistData, artistExtraData, jsonErr
 	}
 
-	fmt.Println(searchResult)
 	return processResult(searchResult)
 }
