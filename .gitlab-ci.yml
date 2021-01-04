@@ -1,4 +1,3 @@
-
 image: registry.windmaker.net:5005/a-castellano/limani/base_golang_1_15:202012301714
 
 stages:
@@ -124,7 +123,7 @@ code_coverage_report:
 
 scan:
   stage: scan
-  image: registry.windmaker.net:5005/a-castellano/limani/base_sonar_scanner:202012301714
+  image: daedalusproject/base_sonar_scanner
   script:
   - sonar-scanner -Dsonar.projectKey=music-manager-musicbrainz-wrapper -Dsonar.sources=. -Dsonar.host.url=https://sonarqube.windmaker.net -Dsonar.login=${SONAR_LOGIN} -Dsonar.exclusions="*/*_test.go"
   dependencies:
