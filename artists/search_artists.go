@@ -31,6 +31,7 @@ func processResult(searchResult map[string]interface{}, artist string) (SearchAr
 					artistData.Name = reflect.ValueOf(candidate["name"]).String()
 					artistData.ID = reflect.ValueOf(candidate["id"]).String()
 					artistData.URL = fmt.Sprintf("https://musicbrainz.org/artist/%s", artistData.ID)
+					artistData.Country = reflect.ValueOf(candidate["country"]).String()
 				}
 			}
 		}
