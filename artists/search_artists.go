@@ -7,20 +7,33 @@ import (
 	commontypes "github.com/a-castellano/music-manager-common-types/types"
 	"io/ioutil"
 	"net/http"
-	"strconv"
+	"reflect"
 	"strings"
 )
 
 type SearchArtistData commontypes.Artist
 
-func processResult(searchResult map[string]interface{}) (SearchArtistData, []SearchArtistData, error) {
+func processResult(searchResult map[string]interface{}, artist string) (SearchArtistData, []SearchArtistData, error) {
 	var artistData SearchArtistData
 	var artistExtraData []SearchArtistData
 
-	numberOfResultsString := fmt.Sprintf("%v", searchResult["count"])
-	numberOfResults, _ := strconv.Atoi(numberOfResultsString)
+	reflectedNumberOfResults := reflect.ValueOf(searchResult["count"])
+	numberOfResults := int(reflectedNumberOfResults.Interface().(float64))
 	if numberOfResults == 0 {
 		return artistData, artistExtraData, errors.New("No artist was found.")
+	} else {
+		artistSlice := reflect.ValueOf(searchResult["artists"])
+		for i := 0; i < artistSlice.Len(); i++ {
+			candidate := artistSlice.Index(i).Interface().(map[string]interface{})
+			if artist == candidate["name"] {
+				score := int(candidate["score"].(float64))
+				if score == 100 {
+					artistData.Name = reflect.ValueOf(candidate["name"]).String()
+					artistData.ID = reflect.ValueOf(candidate["id"]).String()
+					artistData.URL = fmt.Sprintf("https://musicbrainz.org/artist/%s", artistData.ID)
+				}
+			}
+		}
 	}
 
 	return artistData, artistExtraData, nil
@@ -58,5 +71,5 @@ func SearchArtist(client http.Client, artist string) (SearchArtistData, []Search
 		return artistData, artistExtraData, jsonErr
 	}
 
-	return processResult(searchResult)
+	return processResult(searchResult, artist)
 }
