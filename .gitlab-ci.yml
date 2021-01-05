@@ -92,7 +92,7 @@ coverage:
     - ln -s ${CI_PROJECT_DIR} $GOPATH/src/github.com/a-castellano/music-manager-metal-archives-wrapper
     - cd $GOPATH/src/github.com/a-castellano/music-manager-metal-archives-wrapper
   script:
-    - make coverage | tee coverage.out 
+    - make coverage | tee cover/coverage.out 
   coverage: /total:\s+.+\s(\d+\.\d+?)%$/
 
 code_coverage_report:
@@ -125,7 +125,7 @@ scan:
   stage: scan
   image: daedalusproject/base_sonar_scanner
   script:
-  - sonar-scanner -Dsonar.projectKey=music-manager-musicbrainz-wrapper -Dsonar.sources=. -Dsonar.host.url=https://sonarqube.windmaker.net -Dsonar.login=${SONAR_LOGIN} -Dsonar.exclusions="*/*_test.go" -Dsonar.go.coverage.reportPaths="coverage.out"
+  - sonar-scanner -Dsonar.projectKey=music-manager-musicbrainz-wrapper -Dsonar.sources=. -Dsonar.host.url=https://sonarqube.windmaker.net -Dsonar.login=${SONAR_LOGIN} -Dsonar.exclusions="*/*_test.go" -Dsonar.go.coverage.reportPaths="cover/coverage.out"
   dependencies:
   - code_coverage_report
 
