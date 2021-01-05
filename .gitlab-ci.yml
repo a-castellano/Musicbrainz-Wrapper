@@ -92,7 +92,7 @@ coverage:
     - ln -s ${CI_PROJECT_DIR} $GOPATH/src/github.com/a-castellano/music-manager-metal-archives-wrapper
     - cd $GOPATH/src/github.com/a-castellano/music-manager-metal-archives-wrapper
   script:
-    - touch cover/coverage.out
+    - mkdir cover
     - make coverage | tee cover/coverage.out 
   coverage: /total:\s+.+\s(\d+\.\d+?)%$/
 
