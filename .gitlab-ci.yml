@@ -110,6 +110,7 @@ code_coverage_report:
     - cd $GOPATH/src/github.com/a-castellano/music-manager-metal-archives-wrapper
   script:
     - make coverhtml
+    - pwd
   only:
   - master
   dependencies:
