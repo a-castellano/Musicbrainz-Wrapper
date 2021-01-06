@@ -94,6 +94,11 @@ coverage:
   script:
     - make coverage
   coverage: /total:\s+.+\s(\d+\.\d+?)%$/
+  artifacts:
+    name: "coverage-$CI_PIPELINE_ID"
+    paths:
+      - cover
+    expire_in: 1 hour
 
 code_coverage_report:
   stage: report
@@ -110,7 +115,6 @@ code_coverage_report:
     - cd $GOPATH/src/github.com/a-castellano/music-manager-metal-archives-wrapper
   script:
     - make coverhtml
-    - pwd
   only:
   - master
   dependencies:
@@ -130,7 +134,7 @@ scan:
   - ls -lahrt cover
   - sonar-scanner -Dsonar.projectKey=music-manager-musicbrainz-wrapper -Dsonar.sources=. -Dsonar.host.url=https://sonarqube.windmaker.net -Dsonar.login=${SONAR_LOGIN} -Dsonar.exclusions="*/*_test.go" -Dsonar.go.coverage.reportPaths="cover/coverage.report"
   dependencies:
-  - code_coverage_report
+  - coverage
 
 pages:
   stage: deploy
