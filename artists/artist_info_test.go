@@ -143,8 +143,8 @@ func TestGetWithEpsAndOtherTypes(t *testing.T) {
 		t.Errorf("Perkele Demo record should be 'Perkel', not '%s'", demo_record.Name)
 	}
 
-	if demo_record.ID != "feee336f-347f-40e1-b8e1-6800d9a1a543" {
-		t.Errorf("Perkele Demo record ID should be 'feee336f-347f-40e1-b8e1-6800d9a1a543', not '%s'", demo_record.ID)
+	if demo_record.ID != "9a01f10f-3504-4191-adcc-12727948e6ad" {
+		t.Errorf("Perkele Demo record ID should be '9a01f10f-3504-4191-adcc-12727948e6ad', not '%s'", demo_record.ID)
 	}
 
 	if demo_record.Year != 1994 {

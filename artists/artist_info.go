@@ -13,9 +13,29 @@ import (
 
 func calculateRecordType(recordInfo map[string]interface{}) commontypes.RecordType {
 	var recordType commontypes.RecordType
-	if reflect.ValueOf(recordInfo["primary-type"]).String() == "Album" {
+	var secondaryType string = ""
+	switch reflect.ValueOf(recordInfo["primary-type"]).String() {
+	case "Album":
 		recordType = commontypes.FullLength
+	case "EP":
+		recordType = commontypes.EP
+	case "Single":
+		recordType = commontypes.Single
+	default:
+		recordType = commontypes.Other
 	}
+	if reflect.ValueOf(recordInfo["secondary-types"]).Len() != 0 {
+		secondaryType = reflect.ValueOf(recordInfo["secondary-types"]).Index(0).Interface().(string)
+		switch secondaryType {
+		case "Compilation":
+			recordType = commontypes.Compilation
+		case "Live":
+			recordType = commontypes.Live
+		case "Demo":
+			recordType = commontypes.Demo
+		}
+	}
+
 	return recordType
 }
 
