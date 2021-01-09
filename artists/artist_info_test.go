@@ -4,6 +4,7 @@ package artists
 
 import (
 	"bytes"
+	commontypes "github.com/a-castellano/music-manager-common-types/types"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -39,6 +40,29 @@ func TestGetArtistRecords(t *testing.T) {
 	}
 
 	if len(records) != 12 {
-		t.Errorf("Number of retrieved records length should be 6.")
+		t.Errorf("Number of retrieved records length should be 12.")
 	}
+
+	first_record := records[0]
+
+	if first_record.Name != "Winterhours" {
+		t.Errorf("First Tombs record should be 'Winterhours'.")
+	}
+
+	if first_record.ID != "6864f2f5-8609-3abc-857c-c143da8e1723" {
+		t.Errorf("First Tombs record ID should be '6864f2f5-8609-3abc-857c-c143da8e1723'.")
+	}
+
+	if first_record.URL != "https://musicbrainz.org/release-group/6864f2f5-8609-3abc-857c-c143da8e1723" {
+		t.Errorf("First Tombs record URL should be 'https://musicbrainz.org/release-group/6864f2f5-8609-3abc-857c-c143da8e1723'.")
+	}
+
+	if first_record.Year != 2009 {
+		t.Errorf("First Tombs record year should be 2009.")
+	}
+
+	if first_record.Type != commontypes.FullLength {
+		t.Errorf("First Tombs should be FullLength.")
+	}
+
 }
