@@ -66,3 +66,75 @@ func TestGetArtistRecords(t *testing.T) {
 	}
 
 }
+
+func TestGetWithEpsAndOtherTypes(t *testing.T) {
+	artistData := SearchArtistData{Name: "Manowar", URL: "https://musicbrainz.org/artist/00eeed6b-5897-4359-8347-b8cd28375331", ID: "00eeed6b-5897-4359-8347-b8cd28375331", Genre: "", Country: "US"}
+	client := http.Client{Transport: &RoundTripperMock{Response: &http.Response{Body: ioutil.NopCloser(bytes.NewBufferString(`
+{"type-id":"e431f5f6-b5d2-343d-8b36-72607fffb74b","gender":null,"ipis":[],"country":null,"end-area":null,"end_area":null,"sort-name":"Perkele","gender-id":null,"area":{"sort-name":"Gothenburg","type":null,"name":"Gothenburg","id":"8f6c316e-9924-48ea-967b-16757dd82399","disambiguation":"","type-id":null},"id":"9d62c5a5-a94f-4e22-b40f-e3f394191b3f","begin-area":null,"life-span":{"ended":false,"end":null,"begin":"1993"},"isnis":[],"release-groups":[{"primary-type-id":"f529b476-6e62-324f-b0aa-1f3e33d313fc","disambiguation":"","id":"7be87ab7-6185-309a-9de4-5fab22b85498","primary-type":"Album","first-release-date":"1998","title":"Från flykt till kamp","secondary-type-ids":[],"secondary-types":[]},{"primary-type-id":"f529b476-6e62-324f-b0aa-1f3e33d313fc","disambiguation":"","id":"6bc3b679-d8ac-382c-aadb-9c56e303d193","primary-type":"Album","first-release-date":"2001","title":"Voice of Anger","secondary-type-ids":[],"secondary-types":[]},{"disambiguation":"","id":"5ad30cca-bfc5-39e6-bf42-1271e7d004ba","primary-type":"Album","first-release-date":"2002","primary-type-id":"f529b476-6e62-324f-b0aa-1f3e33d313fc","secondary-types":[],"title":"No Shame","secondary-type-ids":[]},{"primary-type-id":"f529b476-6e62-324f-b0aa-1f3e33d313fc","id":"4c4bb914-fa15-3189-8e28-3845bec65763","disambiguation":"","primary-type":"Album","first-release-date":"2003","title":"Stories From the Past","secondary-type-ids":[],"secondary-types":[]},{"secondary-type-ids":[],"title":"Confront","secondary-types":[],"primary-type-id":"f529b476-6e62-324f-b0aa-1f3e33d313fc","first-release-date":"2005","primary-type":"Album","id":"495064c7-a65f-36f6-952d-c0990222d459","disambiguation":""},{"secondary-types":[],"secondary-type-ids":[],"title":"Längtan","first-release-date":"2008-12-01","id":"fc003b8f-57b9-4881-8570-3ab1fed3b4f9","primary-type":"Album","disambiguation":"","primary-type-id":"f529b476-6e62-324f-b0aa-1f3e33d313fc"},{"secondary-type-ids":[],"title":"Perkele Forever","secondary-types":[],"primary-type-id":"f529b476-6e62-324f-b0aa-1f3e33d313fc","first-release-date":"2010","id":"543cf854-b36b-4c76-91bb-63a54a4cb404","primary-type":"Album","disambiguation":""},{"secondary-types":[],"title":"A Way Out","secondary-type-ids":[],"id":"cd779644-abff-43cc-b5b8-03e45c7371cd","primary-type":"Album","disambiguation":"","first-release-date":"2013-10-04","primary-type-id":"f529b476-6e62-324f-b0aa-1f3e33d313fc"},{"primary-type-id":"f529b476-6e62-324f-b0aa-1f3e33d313fc","disambiguation":"","id":"4d116a2c-d79e-4143-b1a8-47a9030b132f","primary-type":"Album","first-release-date":"2019","title":"Leaders Of Tomorrow","secondary-type-ids":[],"secondary-types":[]},{"secondary-type-ids":["dd2a21e1-0c00-3729-a7a0-de60b84eb5d1"],"title":"Det Var Då","secondary-types":["Compilation"],"primary-type-id":"f529b476-6e62-324f-b0aa-1f3e33d313fc","first-release-date":"2013","id":"7d7f1aaf-9fdc-462f-b71f-30ba00d44cf8","primary-type":"Album","disambiguation":""},{"secondary-types":["Live"],"secondary-type-ids":["6fd474e2-6b58-3102-9d17-d6f7eb7da0a0"],"title":"Songs for You","first-release-date":"2009","disambiguation":"","id":"feee336f-347f-40e1-b8e1-6800d9a1a543","primary-type":"Album","primary-type-id":"f529b476-6e62-324f-b0aa-1f3e33d313fc"},{"title":"Days of Punk","secondary-type-ids":[],"secondary-types":[],"primary-type-id":"6d0c5bf6-7a33-3420-a519-44fc63eedebf","id":"b25f2142-a09f-3a19-b714-b304a320e686","primary-type":"EP","disambiguation":"","first-release-date":"2003"},{"primary-type":"EP","id":"1c177b32-32de-3cd0-9883-f4295d6035dc","disambiguation":"","first-release-date":"2003","primary-type-id":"6d0c5bf6-7a33-3420-a519-44fc63eedebf","secondary-types":[],"title":"Göteborg","secondary-type-ids":[]},{"primary-type-id":null,"first-release-date":"2016-12-02","id":"5d812991-3dc0-493b-8c46-c30a38a65ad8","disambiguation":"","primary-type":null,"secondary-type-ids":["dd2a21e1-0c00-3729-a7a0-de60b84eb5d1"],"title":"Best From The Past","secondary-types":["Compilation"]},{"secondary-types":["Demo"],"title":"Perkele","secondary-type-ids":["81598169-0d6c-3bce-b4be-866fa658eda3"],"id":"9a01f10f-3504-4191-adcc-12727948e6ad","primary-type":null,"disambiguation":"","first-release-date":"1994","primary-type-id":null}],"begin_area":null,"type":"Group","disambiguation":"","name":"Perkele"}
+`))}}}
+
+	records, err := GetArtistRecords(client, artistData)
+
+	if err != nil {
+		t.Errorf("TestGetArtistRecords shouldn't fail.")
+	}
+
+	if len(records) != 15 {
+		t.Errorf("Number of retrieved records length should be 15, not %d.", len(records))
+	}
+
+	compilation_record := records[9]
+
+	if compilation_record.Name != "Det Var Då" {
+		t.Errorf("Perkele compilation record should be 'Det Var Då', not '%s'", compilation_record.Name)
+	}
+
+	if compilation_record.ID != "7d7f1aaf-9fdc-462f-b71f-30ba00d44cf8" {
+		t.Errorf("Perkele compilation record ID should be '7d7f1aaf-9fdc-462f-b71f-30ba00d44cf8', not '%s'", compilation_record.ID)
+	}
+
+	if compilation_record.Year != 2013 {
+		t.Errorf("Perkele compilation record year should be 2013, not %d.", compilation_record.Year)
+	}
+
+	if compilation_record.Type != commontypes.Compilation {
+		t.Errorf("Perkele compilation record should be Compilation.")
+	}
+
+	ep_record := records[12]
+
+	if ep_record.Name != "Göteborg" {
+		t.Errorf("Perkele EP record should be 'Göteborg', not '%s'", ep_record.Name)
+	}
+
+	if ep_record.ID != "1c177b32-32de-3cd0-9883-f4295d6035dc" {
+		t.Errorf("Perkele EP record ID should be '1c177b32-32de-3cd0-9883-f4295d6035dc', not '%s'", ep_record.ID)
+	}
+
+	if ep_record.Year != 2003 {
+		t.Errorf("Perkele EP record year should be 2003, not %d.", ep_record.Year)
+	}
+
+	if ep_record.Type != commontypes.Compilation {
+		t.Errorf("Perkele EP record should be EP.")
+	}
+
+	live_record := records[10]
+
+	if live_record.Name != "Songs for You" {
+		t.Errorf("Perkele Live record should be 'Songs for You', not '%s'", live_record.Name)
+	}
+
+	if live_record.ID != "feee336f-347f-40e1-b8e1-6800d9a1a543" {
+		t.Errorf("Perkele Live record ID should be 'feee336f-347f-40e1-b8e1-6800d9a1a543', not '%s'", live_record.ID)
+	}
+
+	if live_record.Year != 2009 {
+		t.Errorf("Perkele Live record year should be 2009, not %d.", live_record.Year)
+	}
+
+	if live_record.Type != commontypes.Live {
+		t.Errorf("Perkele Live record should be Live.")
+	}
+
+}
