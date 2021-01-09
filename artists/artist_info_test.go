@@ -115,7 +115,7 @@ func TestGetWithEpsAndOtherTypes(t *testing.T) {
 		t.Errorf("Perkele EP record year should be 2003, not %d.", ep_record.Year)
 	}
 
-	if ep_record.Type != commontypes.Compilation {
+	if ep_record.Type != commontypes.EP {
 		t.Errorf("Perkele EP record should be EP.")
 	}
 
@@ -135,6 +135,24 @@ func TestGetWithEpsAndOtherTypes(t *testing.T) {
 
 	if live_record.Type != commontypes.Live {
 		t.Errorf("Perkele Live record should be Live.")
+	}
+
+	demo_record := records[14]
+
+	if demo_record.Name != "Perkele" {
+		t.Errorf("Perkele Demo record should be 'Perkel', not '%s'", demo_record.Name)
+	}
+
+	if demo_record.ID != "feee336f-347f-40e1-b8e1-6800d9a1a543" {
+		t.Errorf("Perkele Demo record ID should be 'feee336f-347f-40e1-b8e1-6800d9a1a543', not '%s'", demo_record.ID)
+	}
+
+	if demo_record.Year != 1994 {
+		t.Errorf("Perkele Demo record year should be 1994, not %d.", demo_record.Year)
+	}
+
+	if demo_record.Type != commontypes.Demo {
+		t.Errorf("Perkele demo record should be Demo.")
 	}
 
 }
