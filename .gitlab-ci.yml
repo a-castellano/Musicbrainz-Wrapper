@@ -115,8 +115,6 @@ code_coverage_report:
     - cd $GOPATH/src/github.com/a-castellano/music-manager-metal-archives-wrapper
   script:
     - make coverhtml
-  only:
-  - master
   dependencies:
   - coverage
   artifacts:
@@ -140,11 +138,10 @@ pages:
   stage: deploy
   image: registry.windmaker.net:5005/a-castellano/limani/base:202012301714
   script:
+  - mkdir -p public
   - cp coverage.html public/
   artifacts:
     paths:
     - public
-  only:
-  - master
   dependencies:
   - code_coverage_report
