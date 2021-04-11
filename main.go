@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	albums "github.com/a-castellano/music-manager-musicbrainz-wrapper/albums"
 	artists "github.com/a-castellano/music-manager-musicbrainz-wrapper/artists"
 	"log"
 	"net/http"
@@ -17,4 +19,7 @@ func main() {
 
 	artists.SearchArtist(client, "Melechesh")
 
+	searchAlbumInfo := albums.SearchAlbumInfo{Client: client}
+	release, _, _ := albums.SearchAlbum(searchAlbumInfo, "Total Death")
+	fmt.Println(release)
 }
