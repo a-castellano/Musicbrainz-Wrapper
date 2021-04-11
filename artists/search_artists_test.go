@@ -34,7 +34,7 @@ func TestSearchArtistWithOneResult(t *testing.T) {
 	artistData, artistExtraData, err := SearchArtist(client, "Manowar")
 
 	if err != nil {
-		t.Errorf("TestClientNoArtists yyshouldnt fail.")
+		t.Errorf("TestSearchArtistWithOneResult shouldnt fail.")
 	}
 
 	if artistData.Name != "Manowar" {
