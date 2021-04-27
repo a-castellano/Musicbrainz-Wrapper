@@ -33,8 +33,8 @@ type Release struct {
 
 type SearchAlbumInfoInterface interface {
 	SearchReleaseGroups(req *http.Request) (*http.Response, error)
-	ReleaseGroups(req *http.Request) (*http.Response, error)
-	Releases(req *http.Request) (*http.Response, error)
+	GetReleases(req *http.Request) (*http.Response, error)
+	GetReleaseInfo(req *http.Request) (*http.Response, error)
 }
 
 type SearchAlbumInfo struct {
@@ -48,14 +48,14 @@ func (s SearchAlbumInfo) SearchReleaseGroups(req *http.Request) (*http.Response,
 
 }
 
-func (s SearchAlbumInfo) ReleaseGroups(req *http.Request) (*http.Response, error) {
+func (s SearchAlbumInfo) GetReleases(req *http.Request) (*http.Response, error) {
 	response, responseError := s.Client.Do(req)
 
 	return response, responseError
 
 }
 
-func (s SearchAlbumInfo) Releases(req *http.Request) (*http.Response, error) {
+func (s SearchAlbumInfo) GetReleaseInfo(req *http.Request) (*http.Response, error) {
 	response, responseError := s.Client.Do(req)
 
 	return response, responseError
@@ -64,6 +64,11 @@ func (s SearchAlbumInfo) Releases(req *http.Request) (*http.Response, error) {
 
 func SearchReleaseGroups(s SearchAlbumInfoInterface, req *http.Request) (*http.Response, error) {
 	response, responseError := s.SearchReleaseGroups(req)
+	return response, responseError
+}
+
+func GetReleases(s SearchAlbumInfoInterface, req *http.Request) (*http.Response, error) {
+	response, responseError := s.GetReleases(req)
 	return response, responseError
 }
 
@@ -145,7 +150,52 @@ func getReleaseGroup(searchAlbumInfo SearchAlbumInfo, album string, albumString 
 		return releaseGroup, extraReleaseGroups, releaseGroupErr
 	}
 
+	fmt.Println("https://musicbrainz.org/ws/2/release-group/?query=", albumString, "&fmt=json")
 	return releaseGroup, extraReleaseGroups, nil
+}
+
+func getReleasesFromReleaseGroup(searchAlbumInfo SearchAlbumInfo, releaseGroup ReleaseGroup) ([]Release, error) {
+
+	var releases []Release
+	var releaseResult map[string]interface{}
+
+	searchReleaseGroupUrl := fmt.Sprintf("https://musicbrainz.org/ws/2/release-group/%s?fmt=json&inc=releases", releaseGroup.ID)
+
+	releaseRequest, releaseRequesterr := http.NewRequest(http.MethodGet, searchReleaseGroupUrl, nil)
+	if releaseRequesterr != nil {
+		return releases, releaseRequesterr
+	}
+
+	releaseRequest.Header.Set("User-Agent", "https://github.com/a-castellano/music-manager-musicbrainz-wrapper")
+
+	reqReleaseResponse, reqReleaseResponseError := GetReleases(searchAlbumInfo, releaseRequest)
+
+	if reqReleaseResponseError != nil {
+		return releases, reqReleaseResponseError
+	}
+
+	releaseBody, releaseReadErr := ioutil.ReadAll(reqReleaseResponse.Body)
+	if releaseReadErr != nil {
+		return releases, releaseReadErr
+	}
+
+	jsonErr := json.Unmarshal([]byte(releaseBody), &releaseResult)
+	if jsonErr != nil {
+		return releases, jsonErr
+	}
+
+	releasesSlice := reflect.ValueOf(releaseResult["releases"])
+	for i := 0; i < releasesSlice.Len(); i++ {
+		releaseInfo := releasesSlice.Index(i).Interface().(map[string]interface{})
+		releaseStatus := reflect.ValueOf(releaseInfo["status"]).String()
+		if releaseStatus == "Official" {
+			var release Release
+			release.ID = reflect.ValueOf(releaseInfo["id"]).String()
+			release.Title = reflect.ValueOf(releaseInfo["title"]).String()
+			releases = append(releases, release)
+		}
+	}
+	return releases, nil
 }
 
 func SearchAlbum(searchAlbumInfo SearchAlbumInfo, album string) (Release, []Release, error) {
@@ -153,6 +203,7 @@ func SearchAlbum(searchAlbumInfo SearchAlbumInfo, album string) (Release, []Rele
 	// First query for relelase groups matching album string
 	//	var releaseGroup ReleaseGroup
 	//	var extraReleaseGroup []ReleaseGroup
+	var releases []Release
 	var release Release
 	var extraReleases []Release
 
@@ -166,8 +217,14 @@ func SearchAlbum(searchAlbumInfo SearchAlbumInfo, album string) (Release, []Rele
 	fmt.Println(releaseGroup)
 	fmt.Println(otherReleaseGroups)
 
-	release = getReleaseFromReleaseGroup(searchAlbumInfo, releaseGroup)
-	//	fmt.Println(releaseGroupBody)
+	releasesFromReleaseGroup, getReleasesErr := getReleasesFromReleaseGroup(searchAlbumInfo, releaseGroup)
+
+	if getReleasesErr != nil {
+		return release, extraReleases, releaseGrouperr
+	}
+
+	fmt.Println(releasesFromReleaseGroup)
+	fmt.Println(releases)
 	//https://musicbrainz.org/ws/2/release-group/495064c7-a65f-36f6-952d-c0990222d459?fmt=json&inc=releases
 	//https://musicbrainz.org/ws/2/release/1b704279-f088-4df7-aed9-35c57e79ae15?fmt=json&inc=recordings
 
