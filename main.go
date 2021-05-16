@@ -20,7 +20,7 @@ func main() {
 	artists.SearchArtist(client, "Melechesh")
 
 	searchAlbumInfo := albums.SearchAlbumInfo{Client: client}
-	release, _, _ := albums.SearchAlbum(searchAlbumInfo, "20:11")
-	release, _, _ = albums.SearchAlbum(searchAlbumInfo, "The call")
+	//	release, _, _ := albums.SearchAlbum(searchAlbumInfo, "20:11")
+	release, _, _ := albums.SearchAlbum(searchAlbumInfo, "The call")
 	fmt.Println(release)
 }

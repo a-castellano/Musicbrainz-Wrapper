@@ -79,6 +79,8 @@ func readSearchAlbum(body []byte, album string) (ReleaseGroup, []ReleaseGroup, e
 
 	var results map[string]interface{}
 
+	albumString := strings.ToLower(album)
+
 	jsonErr := json.Unmarshal([]byte(body), &results)
 	if jsonErr != nil {
 		return mainResult, otherResults, jsonErr
@@ -89,11 +91,11 @@ func readSearchAlbum(body []byte, album string) (ReleaseGroup, []ReleaseGroup, e
 	if numberOfResults == 0 {
 		return mainResult, otherResults, errors.New("No album was found.")
 	} else {
-
 		releaseGroupSlice := reflect.ValueOf(results["release-groups"])
 		for i := 0; i < releaseGroupSlice.Len(); i++ {
 			candidate := releaseGroupSlice.Index(i).Interface().(map[string]interface{})
-			if album == candidate["title"] {
+			candidateTitle := strings.ToLower(candidate["title"].(string))
+			if albumString == candidateTitle {
 				score := int(candidate["score"].(float64))
 				if score == 100 && mainResult.ID == "" { // First ocurrence
 					mainResult.ID = reflect.ValueOf(candidate["id"]).String()
@@ -134,7 +136,7 @@ func getReleaseGroup(searchAlbumInfo SearchAlbumInfo, album string, albumString 
 
 	reqReleaseGroup.Header.Set("User-Agent", "https://github.com/a-castellano/music-manager-musicbrainz-wrapper")
 
-	reqReleaseGroupResponse, reqReleaseGroupResponseError := SearchReleaseGroups(searchAlbumInfo, reqReleaseGroup)
+	reqReleaseGroupResponse, reqReleaseGroupResponseError := searchAlbumInfo.SearchReleaseGroups(reqReleaseGroup)
 
 	if reqReleaseGroupResponseError != nil {
 		return releaseGroup, extraReleaseGroups, reqReleaseGroupResponseError
@@ -150,8 +152,36 @@ func getReleaseGroup(searchAlbumInfo SearchAlbumInfo, album string, albumString 
 		return releaseGroup, extraReleaseGroups, releaseGroupErr
 	}
 
-	fmt.Println("https://musicbrainz.org/ws/2/release-group/?query=", albumString, "&fmt=json")
 	return releaseGroup, extraReleaseGroups, nil
+}
+
+func ReadReleaseTracks(releaseInfoBody []byte) ([]Track, error) {
+
+	var tracks []Track
+	var tracksResult map[string]interface{}
+
+	jsonErr := json.Unmarshal([]byte(releaseInfoBody), &tracksResult)
+	if jsonErr != nil {
+		return tracks, jsonErr
+	}
+
+	mediaSlice := reflect.ValueOf(tracksResult["media"])
+	if mediaSlice.IsValid() {
+		for i := 0; i < mediaSlice.Len(); i++ {
+			mediaInfo := mediaSlice.Index(i).Interface().(map[string]interface{})
+			tracksByMediaInfo := reflect.ValueOf(mediaInfo["tracks"])
+			for j := 0; j < tracksByMediaInfo.Len(); j++ {
+				trackInfo := tracksByMediaInfo.Index(j).Interface().(map[string]interface{})
+				var track Track
+				track.ID = reflect.ValueOf(trackInfo["id"]).String()
+				track.Title = reflect.ValueOf(trackInfo["title"]).String()
+				track.Lenght = int(trackInfo["length"].(float64))
+				tracks = append(tracks, track)
+			}
+		}
+	}
+
+	return tracks, nil
 }
 
 func getReleasesFromReleaseGroup(searchAlbumInfo SearchAlbumInfo, releaseGroup ReleaseGroup) ([]Release, error) {
@@ -185,14 +215,46 @@ func getReleasesFromReleaseGroup(searchAlbumInfo SearchAlbumInfo, releaseGroup R
 	}
 
 	releasesSlice := reflect.ValueOf(releaseResult["releases"])
-	for i := 0; i < releasesSlice.Len(); i++ {
-		releaseInfo := releasesSlice.Index(i).Interface().(map[string]interface{})
-		releaseStatus := reflect.ValueOf(releaseInfo["status"]).String()
-		if releaseStatus == "Official" {
-			var release Release
-			release.ID = reflect.ValueOf(releaseInfo["id"]).String()
-			release.Title = reflect.ValueOf(releaseInfo["title"]).String()
-			releases = append(releases, release)
+	if releasesSlice.IsValid() {
+
+		for i := 0; i < releasesSlice.Len(); i++ {
+			releaseInfo := releasesSlice.Index(i).Interface().(map[string]interface{})
+			releaseStatus := reflect.ValueOf(releaseInfo["status"]).String()
+			if releaseStatus == "Official" {
+				var release Release
+				release.ID = reflect.ValueOf(releaseInfo["id"]).String()
+				release.Title = reflect.ValueOf(releaseInfo["title"]).String()
+				releaseQueryString := fmt.Sprintf("https://musicbrainz.org/ws/2/release/%s?fmt=json&inc=recordings", release.ID)
+
+				reqRelease, errReqRelease := http.NewRequest(http.MethodGet, releaseQueryString, nil)
+				if errReqRelease != nil {
+					return releases, errReqRelease
+				}
+
+				reqRelease.Header.Set("User-Agent", "https://github.com/a-castellano/music-manager-musicbrainz-wrapper")
+
+				releaseInfoRaw, releaseInfoErr := searchAlbumInfo.GetReleaseInfo(reqRelease)
+
+				if releaseInfoErr != nil {
+					return releases, releaseInfoErr
+				}
+
+				releaseInfoBody, releaseInfoReadErr := ioutil.ReadAll(releaseInfoRaw.Body)
+				if releaseInfoReadErr != nil {
+					return releases, releaseInfoReadErr
+				}
+
+				releaseTracks, releaseTracksErr := ReadReleaseTracks(releaseInfoBody)
+
+				if releaseTracksErr != nil {
+					return releases, releaseTracksErr
+				}
+
+				release.Tracks = releaseTracks
+
+				releases = append(releases, release)
+
+			}
 		}
 	}
 	return releases, nil
@@ -214,19 +276,24 @@ func SearchAlbum(searchAlbumInfo SearchAlbumInfo, album string) (Release, []Rele
 	if releaseGrouperr != nil {
 		return release, extraReleases, releaseGrouperr
 	}
-	fmt.Println(releaseGroup)
-	fmt.Println(otherReleaseGroups)
 
 	releasesFromReleaseGroup, getReleasesErr := getReleasesFromReleaseGroup(searchAlbumInfo, releaseGroup)
+	releases = releasesFromReleaseGroup
 
 	if getReleasesErr != nil {
 		return release, extraReleases, releaseGrouperr
 	}
 
-	fmt.Println(releasesFromReleaseGroup)
-	fmt.Println(releases)
-	//https://musicbrainz.org/ws/2/release-group/495064c7-a65f-36f6-952d-c0990222d459?fmt=json&inc=releases
-	//https://musicbrainz.org/ws/2/release/1b704279-f088-4df7-aed9-35c57e79ae15?fmt=json&inc=recordings
+	for _, releaseGroup := range otherReleaseGroups {
+		releasesFromReleaseGroup, getReleasesErr = getReleasesFromReleaseGroup(searchAlbumInfo, releaseGroup)
+		if getReleasesErr != nil {
+			return release, extraReleases, releaseGrouperr
+		}
+		releases = append(releases, releasesFromReleaseGroup...)
+	}
+
+	release = releases[0]
+	extraReleases = releases[1:]
 
 	return release, extraReleases, nil
 }
