@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func readSearchAlbum(body []byte, album string) (ReleaseGroup, []ReleaseGroup, error) {
+func readSearchedReleaseGroup(body []byte, album string) (ReleaseGroup, []ReleaseGroup, error) {
 
 	var mainResult ReleaseGroup
 	var otherResults []ReleaseGroup
@@ -28,7 +28,7 @@ func readSearchAlbum(body []byte, album string) (ReleaseGroup, []ReleaseGroup, e
 	reflectedNumberOfResults := reflect.ValueOf(results["count"])
 	numberOfResults := int(reflectedNumberOfResults.Interface().(float64))
 	if numberOfResults == 0 {
-		return mainResult, otherResults, errors.New("No album was found.")
+		return mainResult, otherResults, errors.New("No release group was found.")
 	} else {
 		releaseGroupSlice := reflect.ValueOf(results["release-groups"])
 		for i := 0; i < releaseGroupSlice.Len(); i++ {
@@ -61,7 +61,7 @@ func readSearchAlbum(body []byte, album string) (ReleaseGroup, []ReleaseGroup, e
 	return mainResult, otherResults, nil
 }
 
-func getReleaseGroup(searchAlbumInfo SearchAlbumInfo, album string, albumString string) (ReleaseGroup, []ReleaseGroup, error) {
+func getReleaseGroup(searchAlbumInfo SearchAlbumInfoInterface, album string, albumString string) (ReleaseGroup, []ReleaseGroup, error) {
 
 	var releaseGroup ReleaseGroup
 	var extraReleaseGroups []ReleaseGroup
@@ -86,7 +86,7 @@ func getReleaseGroup(searchAlbumInfo SearchAlbumInfo, album string, albumString 
 		return releaseGroup, extraReleaseGroups, releaseGroupReadErr
 	}
 
-	releaseGroup, extraReleaseGroups, releaseGroupErr := readSearchAlbum(releaseGroupBody, album)
+	releaseGroup, extraReleaseGroups, releaseGroupErr := readSearchedReleaseGroup(releaseGroupBody, album)
 	if releaseGroupErr != nil {
 		return releaseGroup, extraReleaseGroups, releaseGroupErr
 	}

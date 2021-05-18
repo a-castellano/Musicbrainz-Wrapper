@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func SearchAlbum(searchAlbumInfo SearchAlbumInfo, album string) (Release, []Release, error) {
+func SearchAlbum(searchAlbumInfo SearchAlbumInfoInterface, album string) (Release, []Release, error) {
 
 	var releases []Release
 	var release Release

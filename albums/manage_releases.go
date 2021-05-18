@@ -37,7 +37,7 @@ func ReadReleaseTracks(releaseInfoBody []byte) ([]Track, error) {
 	return tracks, nil
 }
 
-func getReleasesFromReleaseGroup(searchAlbumInfo SearchAlbumInfo, releaseGroup ReleaseGroup) ([]Release, error) {
+func getReleasesFromReleaseGroup(searchAlbumInfo SearchAlbumInfoInterface, releaseGroup ReleaseGroup) ([]Release, error) {
 
 	var releases []Release
 	var releaseResult map[string]interface{}
