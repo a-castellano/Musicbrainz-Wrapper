@@ -64,13 +64,48 @@ func TestSearchReleaseGroupWithNoResults(t *testing.T) {
 
 }
 
+func TestSearchReleaseGroupWithResultsButNoMatches(t *testing.T) {
+
+	searchAlbumInfo := MockOneAlbum{}
+	releaseGroup, releaseGroups, err := getReleaseGroup(searchAlbumInfo, "AnyNonExistAlbum", "AnyNonExistAlbum")
+
+	if err != nil {
+		t.Errorf("TestSearchReleaseGroupWithResultsButNoMatches should not fail.")
+	}
+
+	if releaseGroup.ID != "" {
+		t.Errorf("First ReleaseGroup should have no data, not %s.", releaseGroup.ID)
+	}
+
+	if len(releaseGroups) != 0 {
+		t.Errorf("releaseGroups should be an empty array.")
+	}
+
+}
+
 func TestSearchReleaseGroupWithOnlyOneResult(t *testing.T) {
 
 	searchAlbumInfo := MockOneAlbum{}
-	_, _, err := getReleaseGroup(searchAlbumInfo, "AnyNonExistAlbum", "AnyNonExistAlbum")
+	releaseGroup, releaseGroups, err := getReleaseGroup(searchAlbumInfo, "Hexndeifl", "Hexndeifl")
 
 	if err != nil {
 		t.Errorf("TestSearchReleaseGroupWithOnlyOneResult should not fail.")
+	}
+
+	if releaseGroup.ID != "4a9421e6-9def-4616-82bf-674d5a5c7a29" {
+		t.Errorf("First ReleaseGroup ID should be '4a9421e6-9def-4616-82bf-674d5a5c7a29', not '%s'.", releaseGroup.ID)
+	}
+
+	if releaseGroup.Title != "Hexndeifl" {
+		t.Errorf("First ReleaseGroup Title should be 'Hexndeifl', not '%s'.", releaseGroup.Title)
+	}
+
+	if releaseGroup.ReleaseYear != 2021 {
+		t.Errorf("First ReleaseGroup ReleaseYear should be 2021, not '%d'.", releaseGroup.ReleaseYear)
+	}
+
+	if len(releaseGroups) != 0 {
+		t.Errorf("releaseGroups should be an empty array.")
 	}
 
 }
