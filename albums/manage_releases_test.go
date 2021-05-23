@@ -31,4 +31,8 @@ func TestGetReleasesWithOneResult(t *testing.T) {
 		t.Errorf("TestSearchReleaseGroupWithNoResults first release title should be 'Hexndeifl', not '%s'.", firstRelease.Title)
 	}
 
+	if len(firstRelease.Tracks) != 6 {
+		t.Errorf("TestSearchReleaseGroupWithNoResults first release trackNumber should be 6, not '%d'.", len(firstRelease.Tracks))
+	}
+
 }
