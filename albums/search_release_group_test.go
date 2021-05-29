@@ -76,7 +76,7 @@ func TestSearchReleaseGroupWithOnlyOneResult(t *testing.T) {
 
 func TestSearchReleaseGroupWithMoreThanOneResult(t *testing.T) {
 
-	searchAlbumInfo := MockTroReleaseGroups{}
+	searchAlbumInfo := MockTwoReleaseGroups{}
 	releaseGroup, releaseGroups, err := getReleaseGroup(searchAlbumInfo, "In Times Before the Light", "In Times Before the Light")
 
 	if err != nil {
