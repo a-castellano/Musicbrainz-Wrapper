@@ -27,6 +27,7 @@ func processResult(searchResult map[string]interface{}, artist string) (SearchAr
 			candidate := artistSlice.Index(i).Interface().(map[string]interface{})
 			if artist == candidate["name"] {
 				score := int(candidate["score"].(float64))
+				// change this, it coud be two artists with the same name
 				if score == 100 {
 					artistData.Name = reflect.ValueOf(candidate["name"]).String()
 					artistData.ID = reflect.ValueOf(candidate["id"]).String()
