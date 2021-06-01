@@ -248,3 +248,39 @@ func TestProcessJobMoreThanOneArtist(t *testing.T) {
 	}
 
 }
+
+func TestProcessJobDie(t *testing.T) {
+
+	var infoRetrieval commontypes.InfoRetrieval
+	var job commontypes.Job
+
+	infoRetrieval.Type = commontypes.ArtistName
+	infoRetrieval.Artist = ""
+
+	retrievalData, _ := commontypes.EncodeInfoRetrieval(infoRetrieval)
+
+	job.Data = retrievalData
+	job.ID = 0
+	job.Status = true
+	job.Finished = false
+	job.Type = commontypes.Die
+
+	encodedJob, _ := commontypes.EncodeJob(job)
+
+	client := http.Client{Transport: &RoundTripperMock{Response: &http.Response{Body: ioutil.NopCloser(bytes.NewBufferString(`
+	`))}}}
+
+	origin := "MusicBrainzWrapper"
+	die, _, err := ProcessJob(encodedJob, origin, client)
+
+	if err != nil {
+		if err.Error() != "Empty data received." {
+			t.Errorf("Message with failed data should return 'Empty data received.' error, not '%s'.", err.Error())
+		}
+	}
+
+	if die != true {
+		t.Errorf("Job Type die aborts job.")
+	}
+
+}
