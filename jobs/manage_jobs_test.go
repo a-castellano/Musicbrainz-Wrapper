@@ -4,11 +4,12 @@ package jobs
 
 import (
 	"bytes"
-	commontypes "github.com/a-castellano/music-manager-common-types/types"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
+
+	commontypes "github.com/a-castellano/music-manager-common-types/types"
 )
 
 type RoundTripperMock struct {
@@ -43,6 +44,7 @@ func TestProcessJobEmptyData(t *testing.T) {
 	if len(jobResult) == 0 {
 		t.Errorf("jobResult should be empty")
 	}
+
 }
 
 func TestProcessJobErrorOnArtist(t *testing.T) {
@@ -56,7 +58,7 @@ func TestProcessJobErrorOnArtist(t *testing.T) {
 	retrievalData, _ := commontypes.EncodeInfoRetrieval(infoRetrieval)
 
 	job.Data = retrievalData
-	job.ID = 0
+	job.ID = "HashString"
 	job.Status = true
 	job.Finished = false
 	job.Type = 1 // https://musicmanager.gitpages.windmaker.net/Music-Manager-Docs/common-types/#job
@@ -97,6 +99,9 @@ func TestProcessJobErrorOnArtist(t *testing.T) {
 		t.Errorf("decodedJob.LastOrigin should be '%s', not '%s'.", origin, decodedJob.LastOrigin)
 	}
 
+	if decodedJob.Status == true {
+		t.Errorf("decodedJob.Status should be false, job failed.")
+	}
 }
 
 func TestProcessJobOneArtist(t *testing.T) {
@@ -110,7 +115,7 @@ func TestProcessJobOneArtist(t *testing.T) {
 	retrievalData, _ := commontypes.EncodeInfoRetrieval(infoRetrieval)
 
 	job.Data = retrievalData
-	job.ID = 0
+	job.ID = "HashString"
 	job.Status = true
 	job.Finished = false
 	job.Type = commontypes.ArtistInfoRetrieval
@@ -141,6 +146,10 @@ func TestProcessJobOneArtist(t *testing.T) {
 	processedJob, processedJobErr := commontypes.DecodeJob(jobResult)
 	if processedJobErr != nil {
 		t.Errorf("Job result decoding shouldn't fail, error was '%s'.", processedJobErr.Error())
+	}
+
+	if processedJob.Status == false {
+		t.Errorf("decodedJob.Status should be true, job did not fail.")
 	}
 
 	artistInfo, artistInfoDecodeError := commontypes.DecodeArtistInfo(processedJob.Result)
@@ -185,7 +194,7 @@ func TestProcessJobMoreThanOneArtist(t *testing.T) {
 	retrievalData, _ := commontypes.EncodeInfoRetrieval(infoRetrieval)
 
 	job.Data = retrievalData
-	job.ID = 0
+	job.ID = "HashString"
 	job.Status = true
 	job.Finished = false
 	job.Type = commontypes.ArtistInfoRetrieval
@@ -260,7 +269,7 @@ func TestProcessJobDie(t *testing.T) {
 	retrievalData, _ := commontypes.EncodeInfoRetrieval(infoRetrieval)
 
 	job.Data = retrievalData
-	job.ID = 0
+	job.ID = "HashString"
 	job.Status = true
 	job.Finished = false
 	job.Type = commontypes.Die
