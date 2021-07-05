@@ -3,9 +3,10 @@ package jobs
 import (
 	"errors"
 	"fmt"
+	"net/http"
+
 	commontypes "github.com/a-castellano/music-manager-common-types/types"
 	"github.com/a-castellano/music-manager-musicbrainz-wrapper/artists"
-	"net/http"
 )
 
 func ProcessJob(data []byte, origin string, client http.Client) (bool, []byte, error) {
@@ -35,6 +36,7 @@ func ProcessJob(data []byte, origin string, client http.Client) (bool, []byte, e
 					if errSearchArtist != nil {
 						err = errors.New(errors.New("Artist retrieval failed: ").Error() + errSearchArtist.Error())
 						job.Error = err.Error()
+						job.Status = false
 					} else {
 						artistData := commontypes.Artist{}
 						artistData.Name = data.Name
@@ -60,6 +62,7 @@ func ProcessJob(data []byte, origin string, client http.Client) (bool, []byte, e
 				default:
 					err = errors.New("Music Manager MusicBrainz Wrapper - ArtistInfoRetrieval type should be only ArtistName.")
 					job.Error = err.Error()
+					job.Status = false
 				}
 			}
 		case commontypes.RecordInfoRetrieval:
@@ -68,6 +71,7 @@ func ProcessJob(data []byte, origin string, client http.Client) (bool, []byte, e
 			die = true
 		default:
 			err = errors.New("Unknown Job Type for this service.")
+			job.Status = false
 		}
 	} else {
 		err = errors.New("Empty job data received.")
