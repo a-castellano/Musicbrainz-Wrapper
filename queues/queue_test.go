@@ -4,13 +4,14 @@ package queues
 
 import (
 	"bytes"
-	commontypes "github.com/a-castellano/music-manager-common-types/types"
-	config "github.com/a-castellano/music-manager-config-reader/config_reader"
-	"github.com/streadway/amqp"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"testing"
+
+	commontypes "github.com/a-castellano/music-manager-common-types/types"
+	config "github.com/a-castellano/music-manager-config-reader/config_reader"
+	"github.com/streadway/amqp"
 )
 
 type RoundTripperMock struct {
@@ -42,7 +43,7 @@ func TestSendDie(t *testing.T) {
 
 	var job commontypes.Job
 
-	job.ID = 0
+	job.ID = "HashString"
 	job.Status = true
 	job.Finished = false
 	job.Type = commontypes.Die
@@ -116,7 +117,7 @@ func TestSendNoArtistsFound(t *testing.T) {
 	retrievalData, _ := commontypes.EncodeInfoRetrieval(infoRetrieval)
 
 	job.Data = retrievalData
-	job.ID = 0
+	job.ID = "HashString"
 	job.Status = true
 	job.Finished = false
 	job.Type = 1
@@ -159,7 +160,7 @@ func TestSendNoArtistsFound(t *testing.T) {
 	failOnError(err, "Failed to send first job in TestSendNoArtistsFound.")
 	var dieJob commontypes.Job
 
-	dieJob.ID = 0
+	dieJob.ID = "HashString"
 	dieJob.Status = true
 	dieJob.Finished = false
 	dieJob.Type = commontypes.Die
@@ -269,7 +270,7 @@ func TestSendArtistsFound(t *testing.T) {
 	retrievalData, _ := commontypes.EncodeInfoRetrieval(infoRetrieval)
 
 	job.Data = retrievalData
-	job.ID = 0
+	job.ID = "HashString"
 	job.Status = true
 	job.Finished = false
 	job.Type = 1
@@ -312,7 +313,7 @@ func TestSendArtistsFound(t *testing.T) {
 	failOnError(err, "Failed to send first job in TestSendNoArtistsFound.")
 	var dieJob commontypes.Job
 
-	dieJob.ID = 0
+	dieJob.ID = "HashString"
 	dieJob.Status = true
 	dieJob.Finished = false
 	dieJob.Type = commontypes.Die

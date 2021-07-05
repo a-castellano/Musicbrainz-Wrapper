@@ -44,6 +44,7 @@ func TestProcessJobEmptyData(t *testing.T) {
 	if len(jobResult) == 0 {
 		t.Errorf("jobResult should be empty")
 	}
+
 }
 
 func TestProcessJobErrorOnArtist(t *testing.T) {
@@ -98,6 +99,9 @@ func TestProcessJobErrorOnArtist(t *testing.T) {
 		t.Errorf("decodedJob.LastOrigin should be '%s', not '%s'.", origin, decodedJob.LastOrigin)
 	}
 
+	if decodedJob.Status == true {
+		t.Errorf("decodedJob.Status should be false, job failed.")
+	}
 }
 
 func TestProcessJobOneArtist(t *testing.T) {
@@ -142,6 +146,10 @@ func TestProcessJobOneArtist(t *testing.T) {
 	processedJob, processedJobErr := commontypes.DecodeJob(jobResult)
 	if processedJobErr != nil {
 		t.Errorf("Job result decoding shouldn't fail, error was '%s'.", processedJobErr.Error())
+	}
+
+	if processedJob.Status == false {
+		t.Errorf("decodedJob.Status should be true, job did not fail.")
 	}
 
 	artistInfo, artistInfoDecodeError := commontypes.DecodeArtistInfo(processedJob.Result)
